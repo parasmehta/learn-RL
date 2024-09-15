@@ -59,5 +59,6 @@ def run_episodes(nr_episodes=1, nr_steps=2, nr_trainings=5):
 table = []
 for nr_t in (1,3, 5):
     table.append(run_episodes(nr_episodes=1, nr_steps=3, nr_trainings=nr_t))
+    print(len(table))
 
 print(table)

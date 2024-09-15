@@ -41,7 +41,7 @@ def get_agent(nr_trainings: int):
     # 3 - Run a loop for nr_trainings 
     #nr_trainings = nr_trainings  # pylint: disable=invalid-name
     #mean_rewards = []
-    print(f"Training the agent with {nr_trainings} trainings")
+    print(f"\nTraining the agent with {nr_trainings} trainings")
     for _ in range(nr_trainings):
         reports = agent.train()
         if _%2 == 0:
