@@ -44,7 +44,7 @@ def get_agent(nr_trainings: int):
     print(f"\nTraining the agent with {nr_trainings} trainings")
     for _ in range(nr_trainings):
         reports = agent.train()
-        if _%2 == 0:
+        if _%5 == 0:
             print("training:",_, ", mean reward", reports["episode_reward_mean"])
 
     return agent
