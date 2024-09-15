@@ -2,6 +2,7 @@ import torch
 
 from onnx2torch import convert
 from custom_nn import CustomNN, save_model_as_onnx
+from custom_env import CustomCartPoleEnv
 
 
 def load_model_from_onnx(file_name="custom_model.onnx"):
@@ -38,6 +39,31 @@ def test_forward_pass(model):
     assert torch.allclose(output, output_loaded_model, atol=1e-03)
 
 
+def test_environment():
+    # Create the custom environment
+    env = CustomCartPoleEnv(render_mode="human")
+
+    # Reset the environment
+    state = env.reset()
+    print("Initial state:", state)
+
+    terminated = False
+    truncated = False
+
+    # Perform a few steps
+    while not (terminated or truncated):
+        # Take a random action
+        action = env.action_space.sample()
+        print("Action:", action)
+
+        # Perform the action
+        next_state, reward, terminated, truncated, _ = env.step(action)
+        print("Next state:", next_state)
+        print("Reward:", reward)
+        print("Terminated:", terminated)
+        print("Truncated:", truncated)
+
+
 def save_model():
     # Create the model
     model = CustomNN()
@@ -51,3 +77,4 @@ if __name__ == "__main__":
 
     # Test the forward pass
     test_forward_pass(model)
+    test_environment()
