@@ -3,6 +3,7 @@ import torch
 from onnx2torch import convert
 from custom_nn import CustomNN, save_model_as_onnx
 from custom_env import CustomCartPoleEnv
+from gymnasium.wrappers import TimeLimit
 
 
 def load_model_from_onnx(file_name="custom_model.onnx"):
@@ -41,7 +42,8 @@ def test_forward_pass(model):
 
 def test_environment():
     # Create the custom environment
-    env = CustomCartPoleEnv(render_mode="human")
+    env = TimeLimit(CustomCartPoleEnv(
+        render_mode="human"), max_episode_steps=500)
 
     # Reset the environment
     state = env.reset()
@@ -57,6 +59,7 @@ def test_environment():
         print("Action:", action)
 
         # Perform the action
+
         next_state, reward, terminated, truncated, _ = env.step(action)
         print("Next state:", next_state)
         print("Reward:", reward)
