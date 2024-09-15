@@ -112,29 +112,44 @@ if __name__ == '__main__':
     # x = train_inputs[:, :-4]
     # y = train_inputs[:, -4:]
 
-    data_file = 'eps_100_runs_100.pt'
+    data_file_agentic = 'eps_100_runs_100.pt'
+    data_file_random = 'random_eps_100_runs_100.pt'
 
     try:
-        data_dict = torch.load(data_file)
-        print('Data loaded successfully from .pt file.')
+        data_dict_1 = torch.load(data_file_agentic)
+        data_dict_2 = torch.load(data_file_random)
+        print('Data loaded successfully from .pt files.')
     except Exception as e:
         print(f'Error loading data: {e}')
         exit(1)
 
-
     # Initialize lists to store inputs and targets
-    inputs_list = []
-    targets_list = []
+    inputs_list_1 = []
+    targets_list_1 = []
+    inputs_list_2 = []
+    targets_list_2 = []
 
-    # Iterate over the data dictionary
-    for key in data_dict:
-        sample = data_dict[key]
-        inputs_list.append(sample['s_initial_a'])
-        targets_list.append(sample['s_final'])
+    # Iterate over the first data dictionary
+    for key in data_dict_1:
+        sample = data_dict_1[key]
+        inputs_list_1.append(sample['s_initial_a'])
+        targets_list_1.append(sample['s_final'])
+
+    # Iterate over the second data dictionary
+    for key in data_dict_2:
+        sample = data_dict_2[key]
+        inputs_list_2.append(sample['s_initial_a'])
+        targets_list_2.append(sample['s_final'])
 
     # Convert lists to tensors
-    X = torch.stack(inputs_list)
-    y = torch.stack(targets_list)
+    X1 = torch.stack(inputs_list_1)
+    y1 = torch.stack(targets_list_1)
+    X2 = torch.stack(inputs_list_2)
+    y2 = torch.stack(targets_list_2)
+
+    # Concatenate tensors from both datasets
+    X = torch.cat((X1, X2), dim=0)
+    y = torch.cat((y1, y2), dim=0)
 
 
 
@@ -153,7 +168,7 @@ if __name__ == '__main__':
     model.to(device)
 
     target_mse= 0.000001
-    max_epochs= 100
+    max_epochs= 1000
 
     # Train the model
     train_model(model, train_loader, val_loader, device, mse_threshold=target_mse, max_epochs=max_epochs)
