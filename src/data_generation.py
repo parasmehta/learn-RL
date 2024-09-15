@@ -21,6 +21,8 @@ def sequence_create(env, nr_actions, nr_steps=2):
             # save_row = [i, s, a, s']
             # Save initial state s
             save_row = [i, state_i] 
+
+            ## HERE GOES THE ACTION CHOSEN BY THE AGENT
             chosen_action = np.random.randint(nr_actions)
             # Make step
             state_i, _, terminated, truncated, _ = env.step(action=chosen_action)
