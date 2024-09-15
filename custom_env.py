@@ -1,19 +1,33 @@
-import gymnasium as gym
-from gymnasium.envs.classic_control import CartPoleEnv
+from typing import Optional
+
+import numpy as np
 import torch
 from gymnasium import logger
-
-# Custom environment based on CartPole-v1
+from gymnasium.envs.classic_control.cartpole import CartPoleEnv
+from onnx2torch import convert
 
 
 class CustomCartPoleEnv(CartPoleEnv):
-    metadata = {"render_modes": ["human"], "render_fps": 50}
+    """
+    Custom environment based on CartPole-v1
 
-    def __init__(self):
-        super(CustomCartPoleEnv, self).__init__()
-        self.model = torch.onnx.load("custom_model.onnx")
+    The environment uses a neural network model to predict the next state based on the current state and action.
+
+    The neural network model is loaded from an ONNX file.
+
+    """
+
+    def __init__(self, render_mode: Optional[str] = None):
+        super(CustomCartPoleEnv, self).__init__(render_mode)
+        self.current_step = 0
+        self.max_steps = 500
+        self.model = convert("custom_model.onnx")
 
     def step(self, action):
+        err_msg = f"{action!r} ({type(action)}) invalid"
+        assert self.action_space.contains(action), err_msg
+        assert self.state is not None, "Call reset before using step method."
+
         # Combine state and action into one tensor
         state_action = torch.tensor(
             np.append(self.state, action), dtype=torch.float32)
@@ -23,27 +37,32 @@ class CustomCartPoleEnv(CartPoleEnv):
 
         # Update the state
         self.state = next_state
+        x, x_dot, theta, theta_dot = self.state
 
-        # Calculate reward: same as CartPole-v1 (reward = 1 for every step)
-        reward = 1.0
-
-        # Determine if the episode is done
-        done = bool(
-            self.state[0] < -2.4  # Cart position
-            or self.state[0] > 2.4
-            # Pole angle in radians (approx. 12 degrees)
-            or self.state[2] < -0.2095
-            or self.state[2] > 0.2095
-            or self.current_step >= self.max_steps  # Max steps limit
+        terminated = bool(
+            x < -self.x_threshold
+            or x > self.x_threshold
+            or theta < -self.theta_threshold_radians
+            or theta > self.theta_threshold_radians
         )
 
-        self.current_step += 1
+        if not terminated:
+            reward = 1.0
+        elif self.steps_beyond_terminated is None:
+            # Pole just fell!
+            self.steps_beyond_terminated = 0
+            reward = 1.0
+        else:
+            if self.steps_beyond_terminated == 0:
+                logger.warn(
+                    "You are calling 'step()' even though this "
+                    "environment has already returned terminated = True. You "
+                    "should always call 'reset()' once you receive 'terminated = "
+                    "True' -- any further steps are undefined behavior."
+                )
+            self.steps_beyond_terminated += 1
+            reward = 0.0
 
-        return self.state, reward, done, {}
-
-    def render(self, mode="human"):
-        # For now, we will skip rendering, but you could add visualization
-        pass
-
-    def close(self):
-        pass
+        if self.render_mode == "human":
+            self.render()
+        return np.array(self.state, dtype=np.float32), reward, terminated, False, {}
