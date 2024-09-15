@@ -1,5 +1,7 @@
 import gymnasium as gym
 from gymnasium.envs.classic_control import CartPoleEnv
+import torch
+from gymnasium import logger
 
 # Custom environment based on CartPole-v1
 
@@ -9,40 +11,69 @@ class CustomCartPoleEnv(CartPoleEnv):
 
     def __init__(self):
         super(CustomCartPoleEnv, self).__init__()
-
-    def reset(self):
-        # Reset the environment's state to a random state within the observation space
-        self.state = self.observation_space.sample()
-        self.current_step = 0
-        return self.state
+        self.model = torch.onnx.load("custom_model.onnx")
 
     def step(self, action):
-        # Combine state and action into one tensor
-        state_action = torch.tensor(
-            np.append(self.state, action), dtype=torch.float32)
+        assert self.action_space.contains(
+            action
+        ), f"{action!r} ({type(action)}) invalid"
+        assert self.state is not None, "Call reset before using step method."
+        x, x_dot, theta, theta_dot = self.state
+        force = self.force_mag if action == 1 else -self.force_mag
+        costheta = math.cos(theta)
+        sintheta = math.sin(theta)
 
-        # Predict the next state using the neural network model
-        next_state = self.model(state_action).detach().numpy()
+        # For the interested reader:
+        # https://coneural.org/florian/papers/05_cart_pole.pdf
+        temp = (
+            force + self.polemass_length * theta_dot**2 * sintheta
+        ) / self.total_mass
+        thetaacc = (self.gravity * sintheta - costheta * temp) / (
+            self.length * (4.0 / 3.0 - self.masspole *
+                           costheta**2 / self.total_mass)
+        )
+        xacc = temp - self.polemass_length * thetaacc * costheta / self.total_mass
 
-        # Update the state
-        self.state = next_state
+        if self.kinematics_integrator == "euler":
+            x = x + self.tau * x_dot
+            x_dot = x_dot + self.tau * xacc
+            theta = theta + self.tau * theta_dot
+            theta_dot = theta_dot + self.tau * thetaacc
+        else:  # semi-implicit euler
+            x_dot = x_dot + self.tau * xacc
+            x = x + self.tau * x_dot
+            theta_dot = theta_dot + self.tau * thetaacc
+            theta = theta + self.tau * theta_dot
 
-        # Calculate reward: same as CartPole-v1 (reward = 1 for every step)
-        reward = 1.0
+        self.state = (x, x_dot, theta, theta_dot)
 
-        # Determine if the episode is done
-        done = bool(
-            self.state[0] < -2.4  # Cart position
-            or self.state[0] > 2.4
-            # Pole angle in radians (approx. 12 degrees)
-            or self.state[2] < -0.2095
-            or self.state[2] > 0.2095
-            or self.current_step >= self.max_steps  # Max steps limit
+        terminated = bool(
+            x < -self.x_threshold
+            or x > self.x_threshold
+            or theta < -self.theta_threshold_radians
+            or theta > self.theta_threshold_radians
         )
 
-        self.current_step += 1
+        if not terminated:
+            reward = 1.0
+        elif self.steps_beyond_terminated is None:
+            # Pole just fell!
+            self.steps_beyond_terminated = 0
+            reward = 1.0
+        else:
+            if self.steps_beyond_terminated == 0:
+                logger.warn(
+                    "You are calling 'step()' even though this "
+                    "environment has already returned terminated = True. You "
+                    "should always call 'reset()' once you receive 'terminated = "
+                    "True' -- any further steps are undefined behavior."
+                )
+            self.steps_beyond_terminated += 1
+            reward = 0.0
 
-        return self.state, reward, done, {}
+        if self.render_mode == "human":
+            self.render()
+        return np.array(self.state, dtype=np.float32), reward, terminated, False, {}
 
     def render(self, mode="human"):
         # For now, we will skip rendering, but you could add visualization

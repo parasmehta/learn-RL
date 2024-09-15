@@ -45,8 +45,3 @@ def save_model_as_onnx(model, file_name="dummy_model.onnx"):
         }
     )
     print(f"Model has been successfully saved as {file_name}")
-
-
-if __name__ == "__main__":
-    # Create the model
-    model = CustomNN()
