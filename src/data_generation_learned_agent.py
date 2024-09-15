@@ -51,7 +51,7 @@ def run_episodes(nr_episodes=1, nr_steps=2, nr_trainings=5):
     nr_actions = env.action_space.n
     for _ in tqdm(range(nr_episodes)):
         env.reset()
-        saved_data= sequence_create(env, nr_actions, nr_steps)
+        saved_data= sequence_create(env, nr_actions, nr_steps, nr_trainings)
     return saved_data
 
 #table = run_episodes(nr_episodes=1, nr_steps=3)
