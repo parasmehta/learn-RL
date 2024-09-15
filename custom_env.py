@@ -4,6 +4,7 @@ import numpy as np
 import torch
 from gymnasium import logger
 from gymnasium.envs.classic_control.cartpole import CartPoleEnv
+from gymnasium.wrappers import TimeLimit
 from onnx2torch import convert
 
 
@@ -66,3 +67,7 @@ class CustomCartPoleEnv(CartPoleEnv):
         if self.render_mode == "human":
             self.render()
         return np.array(self.state, dtype=np.float32), reward, terminated, False, {}
+
+
+def create_custom_env(env_config):
+    return TimeLimit(env=CustomCartPoleEnv(render_mode=env_config["render_mode"]), max_episode_steps=500)
