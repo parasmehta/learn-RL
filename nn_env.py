@@ -4,6 +4,7 @@ import torch.optim as optim
 import onnx
 from torch.utils.data import DataLoader, TensorDataset, random_split
 import matplotlib.pyplot as plt
+import numpy as np
 
 # Define the MLPModel class
 class MLPModel(nn.Module):
@@ -98,7 +99,6 @@ def train_model(model, train_loader, val_loader, device, mse_threshold=0.01, max
             break
 
 if __name__ == '__main__':
-    import numpy as np
 
     # Generate synthetic data
     # X = np.random.rand(1000, 5).astype(np.float32)
@@ -112,8 +112,6 @@ if __name__ == '__main__':
     # x = train_inputs[:, :-4]
     # y = train_inputs[:, -4:]
 
-
-# Replace 'data_file.pt' with your actual file name
     data_file = 'eps_100_runs_100.pt'
 
     try:
@@ -154,8 +152,11 @@ if __name__ == '__main__':
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     model.to(device)
 
+    target_mse= 0.000001
+    max_epochs= 100
+
     # Train the model
-    train_model(model, train_loader, val_loader, device, mse_threshold=0.000001, max_epochs=100)
+    train_model(model, train_loader, val_loader, device, mse_threshold=target_mse, max_epochs=max_epochs)
 
     # Load the best model weights
     model.load_state_dict(torch.load('best_model.pth'))
