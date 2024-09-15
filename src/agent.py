@@ -8,7 +8,6 @@ from matplotlib import pyplot as plt
 from ray.rllib.algorithms.dqn import DQNConfig
 
 
-
 def get_agent(nr_trainings: int):
     """Provide CartPole agent trained via DQn for nr_trainings episodes.
     Create agent: 
@@ -42,11 +41,11 @@ def get_agent(nr_trainings: int):
     # 3 - Run a loop for nr_trainings 
     #nr_trainings = nr_trainings  # pylint: disable=invalid-name
     #mean_rewards = []
-    print("Training the agent:")
+    print(f"Training the agent with {nr_trainings} trainings")
     for _ in range(nr_trainings):
         reports = agent.train()
         if _%2 == 0:
-            print("episode: ",_, "episode mean reward", reports["episode_reward_mean"])
+            print("training:",_, ", mean reward", reports["episode_reward_mean"])
 
     return agent
 
@@ -54,6 +53,6 @@ def get_agent(nr_trainings: int):
 if __name__ == "__main__":
     print("Testing the agent construction: Create with 1 training")
 
-    a = agent(1)
+    a = get_agent(1)
     print("agent a: ", a)
     print("done?")

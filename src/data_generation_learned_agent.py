@@ -7,7 +7,7 @@ from agent import get_agent
 
 # one round sequence_create
 
-def sequence_create(env, nr_actions, nr_steps=2):
+def sequence_create(env, nr_actions, nr_steps=2, nr_trainings=5):
     state_i, _= env.reset() 
     print("Beginning")
     print(state_i)
@@ -17,8 +17,8 @@ def sequence_create(env, nr_actions, nr_steps=2):
     
     save_rows = [] 
 
-    # create agent with nr_episodes=5 for the moment: 
-    agent = get_agent(5)
+    # create agent with nr_trainings=5 as defaulte
+    agent = get_agent(nr_trainings)
 
     for i in range(nr_steps):
         if terminated or truncated:
@@ -45,7 +45,7 @@ def sequence_create(env, nr_actions, nr_steps=2):
     return save_rows
 
 # run episodes
-def run_episodes(nr_episodes=1, nr_steps=2):
+def run_episodes(nr_episodes=1, nr_steps=2, nr_trainings=5):
     # Create an environment
     env = gym.make("CartPole-v1", render_mode="rgb_array")
     nr_actions = env.action_space.n
@@ -54,5 +54,10 @@ def run_episodes(nr_episodes=1, nr_steps=2):
         saved_data= sequence_create(env, nr_actions, nr_steps)
     return saved_data
 
-table = run_episodes(nr_episodes=1, nr_steps=3)
+#table = run_episodes(nr_episodes=1, nr_steps=3)
+
+table = []
+for nr_t in (1,3, 5):
+    table.append(run_episodes(nr_episodes=1, nr_steps=3, nr_trainings=nr_t))
+
 print(table)
