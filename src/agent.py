@@ -35,7 +35,7 @@ def agent(nr_trainings):
     # 1.5 - Build the agent from the config with .build()
     agent = config.build()
     
-        # 3 - Run a loop for nr_trainings = 50 times
+    # 3 - Run a loop for nr_trainings = 50 times
     #nr_trainings = nr_trainings  # pylint: disable=invalid-name
     mean_rewards = []
     for _ in range(nr_trainings):
