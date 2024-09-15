@@ -1,5 +1,7 @@
 import gymnasium as gym
 from gymnasium.envs.classic_control import CartPoleEnv
+import torch
+from gymnasium import logger
 
 # Custom environment based on CartPole-v1
 
@@ -9,12 +11,7 @@ class CustomCartPoleEnv(CartPoleEnv):
 
     def __init__(self):
         super(CustomCartPoleEnv, self).__init__()
-
-    def reset(self):
-        # Reset the environment's state to a random state within the observation space
-        self.state = self.observation_space.sample()
-        self.current_step = 0
-        return self.state
+        self.model = torch.onnx.load("custom_model.onnx")
 
     def step(self, action):
         # Combine state and action into one tensor
@@ -42,7 +39,7 @@ class CustomCartPoleEnv(CartPoleEnv):
 
         self.current_step += 1
 
-        return self.state, reward, terminated, truncated, {}
+        return self.state, reward, done, {}
 
     def render(self, mode="human"):
         # For now, we will skip rendering, but you could add visualization

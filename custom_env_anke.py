@@ -3,44 +3,37 @@ Classic cart-pole system implemented by Rich Sutton et al.
 Copied from http://incompleteideas.net/sutton/book/code/pole.c
 permalink: https://perma.cc/C9ZM-652R
 """
-import math
-from typing import Optional, Union
+from typing import Optional
 
 import numpy as np
-
-import gym
-from gym import logger, spaces
-from gym.envs.classic_control import utils
-from gym.error import DependencyNotInstalled
 import torch
-from gym.envs.classic_control.cartpole import CartPoleEnv
+from gymnasium import logger
+from gymnasium.envs.classic_control.cartpole import CartPoleEnv
+from onnx2torch import convert
 
-class LearnedEnv(CartPoleEnv):
+
+class CustomCartPoleEnv(CartPoleEnv):
     def __init__(self, render_mode: Optional[str] = None):
-        super(LearnedEnv, self).__init__(render_mode)
+        super(CustomCartPoleEnv, self).__init__(render_mode)
         self.current_step = 0
         self.max_steps = 500
-        self.model = torch.load("model.pt")
+        self.model = convert("custom_model.onnx")
 
-    
     def step(self, action):
         err_msg = f"{action!r} ({type(action)}) invalid"
         assert self.action_space.contains(action), err_msg
         assert self.state is not None, "Call reset before using step method."
 
         # Combine state and action into one tensor
-        state_action = torch.tensor(
-            np.append(self.state, action), dtype=torch.float32)
+        state_action = torch.tensor(np.append(self.state, action), dtype=torch.float32)
 
         # Predict the next state using the neural network model
         next_state = self.model(state_action).detach().numpy()
 
-    
         # Update the state
         self.state = next_state
         x, x_dot, theta, theta_dot = self.state
-    
-      
+
         terminated = bool(
             x < -self.x_threshold
             or x > self.x_threshold
