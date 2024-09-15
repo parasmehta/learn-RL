@@ -9,8 +9,12 @@ from ray.rllib.algorithms.dqn import DQNConfig
 
 
 
-def agent(nr_trainings):
+def get_agent(nr_trainings: int):
     """Provide CartPole agent trained via DQn for nr_trainings episodes.
+    Create agent: 
+        agent = get_agent(nr_trainings: int)
+    Call for action a like this: 
+        a = agent.compute_single_action(observation=s, explore=False)
 
     Args:
         nr_trainings (int): Number of training episodes for the agent.
