@@ -42,7 +42,6 @@ def combine_data(s_i, a, s_f):
 
         x_list.append(float(a))  
 
-        print(x_list) 
         combined = {
             's_initial_a': x_list,
             's_final': s_f

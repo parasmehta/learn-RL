@@ -50,5 +50,5 @@ def run_episodes(nr_episodes=100, nr_steps=10):
         whole_dataset.extend(episode_data)
     return whole_dataset
 
-table = run_episodes(nr_episodes=10000, nr_steps=100)
-save_dataset(datapoints=table, folder="data/second_dataset", name = "eps_10000_runs_100")
+table = run_episodes(nr_episodes=100, nr_steps=100)
+save_dataset(datapoints=table, folder="data/random_dataset", name = "eps_100_runs_100")
