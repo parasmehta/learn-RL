@@ -42,7 +42,7 @@ class CustomCartPoleEnv(CartPoleEnv):
 
         self.current_step += 1
 
-        return self.state, reward, done, {}
+        return self.state, reward, terminated, truncated, {}
 
     def render(self, mode="human"):
         # For now, we will skip rendering, but you could add visualization
