@@ -14,7 +14,7 @@ def get_agent(nr_trainings: int):
     Create agent: 
         agent = get_agent(nr_trainings: int)
     Call for action a like this: 
-        a = agent.compute_single_action(observation=s, explore=False)
+        a = agent.compute_single_action(observation=state s, explore=False)
 
     Args:
         nr_trainings (int): Number of training episodes for the agent.
@@ -39,11 +39,14 @@ def get_agent(nr_trainings: int):
     # 1.5 - Build the agent from the config with .build()
     agent = config.build()
     
-    # 3 - Run a loop for nr_trainings = 50 times
+    # 3 - Run a loop for nr_trainings 
     #nr_trainings = nr_trainings  # pylint: disable=invalid-name
-    mean_rewards = []
+    #mean_rewards = []
+    print("Training the agent:")
     for _ in range(nr_trainings):
         reports = agent.train()
+        if _%2 == 0:
+            print("episode: ",_, "episode mean reward", reports["episode_reward_mean"])
 
     return agent
 
