@@ -8,9 +8,12 @@ from matplotlib import pyplot as plt
 from ray.rllib.algorithms.dqn import DQNConfig
 
 
-
-def agent(nr_trainings):
+def get_agent(nr_trainings: int):
     """Provide CartPole agent trained via DQn for nr_trainings episodes.
+    Create agent: 
+        agent = get_agent(nr_trainings: int)
+    Call for action a like this: 
+        a = agent.compute_single_action(observation=state s, explore=False)
 
     Args:
         nr_trainings (int): Number of training episodes for the agent.
@@ -35,11 +38,14 @@ def agent(nr_trainings):
     # 1.5 - Build the agent from the config with .build()
     agent = config.build()
     
-        # 3 - Run a loop for nr_trainings = 50 times
+    # 3 - Run a loop for nr_trainings 
     #nr_trainings = nr_trainings  # pylint: disable=invalid-name
-    mean_rewards = []
+    #mean_rewards = []
+    print(f"\nTraining the agent with {nr_trainings} trainings")
     for _ in range(nr_trainings):
         reports = agent.train()
+        if _%5 == 0:
+            print("training:",_, ", mean reward", reports["episode_reward_mean"])
 
     return agent
 
@@ -47,6 +53,6 @@ def agent(nr_trainings):
 if __name__ == "__main__":
     print("Testing the agent construction: Create with 1 training")
 
-    a = agent(1)
+    a = get_agent(1)
     print("agent a: ", a)
     print("done?")
