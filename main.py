@@ -15,7 +15,7 @@ def load_model_from_onnx(file_name="custom_model.onnx"):
     return model
 
 
-def test_forward_pass(model):
+def test_forward_pass():
     model = CustomNN()
     # Create a dummy input tensor
     dummy_input = torch.randn(1, 5, dtype=torch.float32)
@@ -75,9 +75,6 @@ def save_model():
 
 if __name__ == "__main__":
 
-    # Load the model from the ONNX file
-    model = load_model_from_onnx("custom_model.onnx")
-
     # Test the forward pass
-    test_forward_pass(model)
+    test_forward_pass()
     test_environment()
